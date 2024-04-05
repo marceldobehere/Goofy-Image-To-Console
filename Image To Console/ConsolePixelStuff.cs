@@ -25,6 +25,7 @@ namespace Image_To_Console
         public const string charMap = "▀▁▂▃▄▅▆▇█▉▊▋▌▍▎▏▐░▒▓▔▕▖▗▘▙▚▛▜▝▞▟ ";
         public static ImageChar[] mapArray = new ImageChar[charMap.Length];
         public static int chrWidth, chrHeight;
+        public static ImageCharColored black = new ImageCharColored() { Chr = '#', Fg = new Rgba32(0,0,0), Bg = new Rgba32(0, 0, 0) };
 
         public static void CreateCharMap(string path)
         {

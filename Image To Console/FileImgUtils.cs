@@ -66,8 +66,11 @@ namespace Image_To_Console
                     else
                         Console.Write(pxl.Chr);
                 }
+                if (col)
+                    PrintPxl(black);
                 Console.WriteLine("\x1b[0m");
             }
+            Console.WriteLine("\x1b[0m");
 
             PadHeight(img.GetLength(1), Console.WindowHeight - 1);
         }
@@ -87,7 +90,12 @@ namespace Image_To_Console
                         else
                             sw.Write(pxl.Chr);
                     }
-                    sw.WriteLine();
+                    if (col)
+                        sw.Write(PxlToStr(black));
+                    if (col)
+                        sw.WriteLine("\x1b[0m");
+                    else
+                        sw.WriteLine();
                 }
             }
         }
