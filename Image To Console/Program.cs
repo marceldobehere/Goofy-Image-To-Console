@@ -31,8 +31,21 @@ public class Program
         Console.WriteLine($"> Loading Map Img");
         CreateCharMap("map.png");
 
-        Console.WriteLine($"> Loading Src Img");
-        Image<Rgba32> srcImg = Image.Load<Rgba32>(imgName);
+        Console.WriteLine($"> Loading Src Img \"{imgName}\"");
+        Image<Rgba32> srcImg;
+        try
+        {
+            srcImg = Image.Load<Rgba32>(imgName);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine($"> ERROR: Program could not find the source image! (\"{imgName}\")");
+            Console.WriteLine($"  Please make sure that the source image is in the same location as your executable!");
+            Console.WriteLine($"  Error: {e.Message}");
+            Console.ReadLine();
+            Environment.Exit(1);
+            return;
+        }
         Console.WriteLine($"> Size: {srcImg.Bounds.Width}x{srcImg.Bounds.Height}");
 
         Console.WriteLine("Press Enter to convert.");

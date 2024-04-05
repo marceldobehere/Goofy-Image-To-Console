@@ -28,7 +28,20 @@ namespace Image_To_Console
 
         public static void CreateCharMap(string path)
         {
-            Image<Rgba32> charmapImg = Image.Load<Rgba32>(path);
+            Image<Rgba32> charmapImg;
+            try
+            {
+                charmapImg = Image.Load<Rgba32>(path);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"> ERROR: Program could not find the map image! (\"{path}\")");
+                Console.WriteLine($"  Please make sure that the map image is in the same location as your executable!");
+                Console.WriteLine($"  Error: {e.Message}");
+                Console.ReadLine();
+                Environment.Exit(1);
+                return;
+            }
             Console.WriteLine($"> Size: {charmapImg.Bounds.Width}x{charmapImg.Bounds.Height}");
 
             chrWidth = charmapImg.Bounds.Width;
