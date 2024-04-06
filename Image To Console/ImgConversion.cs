@@ -51,6 +51,8 @@ namespace Image_To_Console
                         PrintPxl(res[x, y]);
                 }
                 if (!silent)
+                    PrintPxl(black);
+                if (!silent)
                     Console.WriteLine("\x1b[0m");
             }
             if (!silent)

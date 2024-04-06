@@ -76,7 +76,7 @@ public class Program
         Console.ReadLine();
 
         Console.WriteLine($"> Converting Src Img to MAX {Console.WindowWidth - 1}x{Console.WindowHeight - 1}");
-        ImageCharColored[,] converted = ConvertImage(srcImg.Frames[0], Console.WindowWidth - 1, Console.WindowHeight - 1, false);
+        ImageCharColored[,] converted = ConvertImage(srcImg.Frames[0], Console.WindowWidth - 2, Console.WindowHeight - 2, false);
 
         Console.WriteLine($"> Printing (no col)");
         Print(converted, false, true);
