@@ -106,7 +106,10 @@ public class Program
         }
 
         if (sorted.Count == 0)
+        {
+            Console.WriteLine($"> ERROR: No .cpng files found in folder \"{folderName}\"");
             return;
+        }
 
         // Sort by frame number
         Console.WriteLine("> Sorting Files");
