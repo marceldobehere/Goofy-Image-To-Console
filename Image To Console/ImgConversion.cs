@@ -12,7 +12,7 @@ namespace Image_To_Console
 {
     public class ImgConversion
     {
-        public static ImageCharColored[,] ConvertImage(Image<Rgba32> src, int w, int h)
+        public static ImageCharColored[,] ConvertImage(ImageFrame<Rgba32> src, int w, int h, bool silent)
         {
             double yDiv = (src.Height / 2) / (double)h;
             double xDiv = src.Width / (double)w;
@@ -24,7 +24,8 @@ namespace Image_To_Console
 
             ImageCharColored[,] res = new ImageCharColored[w, h];
 
-            Console.WriteLine($"> Actually converting Img to {w}x{h}");
+            if (!silent)
+                Console.WriteLine($"> Actually converting Img to {w}x{h}");
 
             for (int y = 0; y < h; y++)
             {
@@ -45,11 +46,15 @@ namespace Image_To_Console
                             sub[subX, subY] = src[aX1 + subX, aY1 + subY];
 
                     res[x, y] = FindBestCharForArea(sub);
-                    PrintPxl(res[x, y]);
+
+                    if (!silent)
+                        PrintPxl(res[x, y]);
                 }
-                Console.WriteLine("\x1b[0m");
+                if (!silent)
+                    Console.WriteLine("\x1b[0m");
             }
-            PadHeight(res.GetLength(1), Console.WindowHeight - 1);
+            if (!silent)
+                PadHeight(res.GetLength(1), Console.WindowHeight - 1);
 
             return res;
         }
@@ -159,12 +164,30 @@ namespace Image_To_Console
             return diff;
         }
 
+        public static bool AreaIsOneColor(Rgba32[,] area)
+        {
+            Rgba32 first = area[0, 0];
+            for (int x = 0; x < area.GetLength(0); x++)
+                for (int y = 0; y < area.GetLength(1); y++)
+                    if (area[x, y] != first)
+                        return false;
+            return true;
+        }
+
         public static ImageCharColored FindBestCharForArea(Rgba32[,] area)
         {
             ImageCharColored best = new ImageCharColored();
             best.Chr = '?';
             best.Fg = new Rgba32(255, 255, 255);
             best.Bg = new Rgba32(0, 0, 0);
+
+            if (AreaIsOneColor(area))
+            {
+                best.Chr = ' ';
+                best.Fg = area[0, 0];
+                best.Bg = area[0, 0];
+                return best;
+            }
 
             long bestScore = long.MaxValue;
             for (int i = 0; i < mapArray.Length; i++)

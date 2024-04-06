@@ -1,4 +1,5 @@
-﻿using SixLabors.ImageSharp.PixelFormats;
+﻿using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -54,25 +55,28 @@ namespace Image_To_Console
             Console.Write(str);
         }
 
-        public static void Print(ImageCharColored[,] img, bool col)
+        public static void Print(ImageCharColored[,] img, bool col, bool pad)
         {
+            StringBuilder str = new StringBuilder();
             for (int y = 0; y < img.GetLength(1); y++)
             {
                 for (int x = 0; x < img.GetLength(0); x++)
                 {
                     ImageCharColored pxl = img[x, y];
                     if (col)
-                        PrintPxl(pxl);
+                        str.Append(PxlToStr(pxl));
                     else
-                        Console.Write(pxl.Chr);
+                        str.Append(pxl.Chr);
                 }
                 if (col)
-                    PrintPxl(black);
-                Console.WriteLine("\x1b[0m");
+                    str.Append(PxlToStr(black));
+                str.AppendLine("\x1b[0m");
             }
-            Console.WriteLine("\x1b[0m");
+            str.AppendLine("\x1b[0m");
 
-            PadHeight(img.GetLength(1), Console.WindowHeight - 1);
+            Console.WriteLine(str.ToString());
+            if (pad)
+                PadHeight(img.GetLength(1), Console.WindowHeight - 1);
         }
 
         public static void Save(ImageCharColored[,] img, bool col, string path)
@@ -98,6 +102,39 @@ namespace Image_To_Console
                         sw.WriteLine();
                 }
             }
+        }
+
+        public static void SaveAsConsolePng(ImageCharColored[,] img, string path)
+        {
+            Image<Rgba32> imgPng = new(img.GetLength(0) * 2, img.GetLength(1));
+            for (int y = 0; y < img.GetLength(1); y++)
+                for (int x = 0; x < img.GetLength(0); x++)
+                {
+                    ImageCharColored pxl = img[x, y];
+                    pxl.Fg.A = (byte)charMap.IndexOf(pxl.Chr);
+                    imgPng[x * 2, y] = pxl.Fg;
+                    imgPng[x * 2 + 1, y] = pxl.Bg;
+                }
+            
+            imgPng.SaveAsPng(path);
+        }
+
+        public static ImageCharColored[,] LoadConsolePng(string path)
+        {
+            Image<Rgba32> imgPng = Image.Load<Rgba32>(path);
+            ImageCharColored[,] res = new ImageCharColored[imgPng.Width / 2, imgPng.Height];
+            for (int y = 0; y < imgPng.Height; y++)
+                for (int x = 0; x < imgPng.Width; x += 2)
+                {
+                    res[x / 2, y] = new ImageCharColored()
+                    {
+                        Fg = imgPng[x, y],
+                        Bg = imgPng[x + 1, y],
+                        Chr = charMap[imgPng[x, y].A]
+                    };
+                }
+
+            return res;
         }
     }
 }
