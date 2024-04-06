@@ -139,14 +139,16 @@ public class Program
 
         int w = imgs[0].GetLength(0);
         int h = imgs[0].GetLength(1);
-        Console.SetWindowSize(w + 2, h + 2);
+        Console.SetWindowSize(w + 4, h + 4);
 
         Console.Clear();
         Stopwatch stopwatch = new Stopwatch();
         stopwatch.Start();
         for (int i = 0; i < imgs.Count; i++)
         {
-            Console.SetCursorPosition(0, 0);
+            //Console.SetCursorPosition(0, 0);
+            //Console.Write($"\r\x1b[{}A");
+            Console.Write($"\r\x1b[0;0H");
             Console.CursorVisible = false;
             Print(imgs[i], true, false);
 
