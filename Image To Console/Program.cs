@@ -9,7 +9,7 @@ public class Program
 {
     public static void Main(string[] args)
     {
-        Console.OutputEncoding = System.Text.Encoding.Unicode;
+        Console.OutputEncoding = System.Text.Encoding.UTF8;
         Console.ForegroundColor = ConsoleColor.White;
         Console.BackgroundColor = ConsoleColor.Black;
         Console.Clear();
@@ -126,6 +126,11 @@ public class Program
             imgs.Add(LoadConsolePng(sorted[i]));
         }
 
+        Console.Write("> Enter FPS: ");
+        int fps = int.Parse(Console.ReadLine());
+        Console.WriteLine();
+
+
         Console.WriteLine("> Press Enter to play...");
         Console.ReadLine();
 
@@ -134,11 +139,17 @@ public class Program
         Console.SetWindowSize(w + 2, h + 2);
 
         Console.Clear();
+        Stopwatch stopwatch = new Stopwatch();
+        stopwatch.Start();
         for (int i = 0; i < imgs.Count; i++)
         {
             Console.SetCursorPosition(0, 0);
             Console.CursorVisible = false;
             Print(imgs[i], true, false);
+
+            int fpsTime = (i * 1000 / fps);
+            while (stopwatch.ElapsedMilliseconds < fpsTime)
+                Thread.Sleep(1);
         }
     }
 
@@ -171,6 +182,9 @@ public class Program
             return;
         }
         Console.WriteLine($"> Size: {srcImg.Bounds.Width}x{srcImg.Bounds.Height}");
+        // Get FPS from GIF
+        int fps = 100/srcImg.Frames.RootFrame.Metadata.GetGifMetadata().FrameDelay;
+        Console.WriteLine($"> FPS: {fps}");
 
         Console.WriteLine("Press Enter to convert.");
         Console.ReadLine();
