@@ -3,3 +3,5 @@ Turns an image into colored text made out of block characters that can be displa
 
 ## Screenshot
 ![Converted a picture of my caramel waffles](./images/screenshot.PNG)
+
+![Bad Apple](./images/bad%20apple.gif)
