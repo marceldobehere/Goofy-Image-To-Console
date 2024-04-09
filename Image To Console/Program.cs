@@ -9,89 +9,245 @@ public class Program
 {
     public static void Main(string[] args)
     {
+        string givenInputPath = ""; // first arg
+        string givenOutputPath = ""; // -o PATH
+        string givenSize = ""; // -size 100x100
+        string givenFPS = ""; // -fps 30
+        bool silent = false;
+
+        if (args.Length > 0)
+            givenInputPath = args[0];
+        
+        int start = 1;
+        if (args.Length > 0 && args[0].StartsWith("-"))
+            start = 0;
+        
+        for (int i = start; i < args.Length; i++)
+        {
+            if (args[i] == "-o" || args[i] == "--o")
+            {
+                if (i + 1 < args.Length)
+                    givenOutputPath = args[++i];
+                else
+                {
+                    Console.WriteLine("> ERROR: No output path given after -o");
+                    Console.ReadLine();
+                    return;
+                }
+            }
+            else if (args[i] == "-size" || args[i] == "--size")
+            {
+                if (i + 1 < args.Length)
+                    givenSize = args[++i];
+                else
+                {
+                    Console.WriteLine("> ERROR: No size given after -size");
+                    Console.ReadLine();
+                    return;
+                }
+            }
+            else if (args[i] == "-fps" || args[i] == "--fps")
+            {
+                if (i + 1 < args.Length)
+                    givenFPS = args[++i];
+                else
+                {
+                    Console.WriteLine("> ERROR: No fps given after -fps");
+                    Console.ReadLine();
+                    return;
+                }
+            }
+            else if (args[i] == "-s" || args[i] == "--silent")
+            {
+                silent = true;
+            }
+            else if (args[i] == "-help" || args[i] == "--help")
+            {
+                Console.WriteLine("> Image To Console");
+                Console.WriteLine("  Converts images to console output / or views them");
+                Console.WriteLine("  ");
+                Console.WriteLine("> Arguments:");
+                Console.WriteLine("    [input] - Path to the image to convert/view.");
+                Console.WriteLine("    -o, --o [output] - Path to save the output to.");
+                Console.WriteLine("    -size, --size [width]x[height] - Size of the output.");
+                Console.WriteLine("    -fps, --fps [fps] - FPS of the folder video when displayed.");
+                Console.WriteLine("    -s, --silent - Silent mode.");
+                Console.WriteLine("    -help, --help - Show this help message.");
+                Console.WriteLine("  ");
+                Console.WriteLine("> Input Formats (Convert): ");
+                Console.WriteLine("    .png, .jpg, .jpeg, .gif");
+                Console.WriteLine("  ");
+                Console.WriteLine("> Input Formats (View): ");
+                Console.WriteLine("    .txt, .cpng, [folder with .cpng files]");
+                Console.WriteLine("  ");
+                Console.WriteLine("> Output Formats: ");
+                Console.WriteLine("    .txt, .cpng, [folder for gifs]");
+                Console.WriteLine("  ");
+                Console.WriteLine("> Examples:");
+                Console.WriteLine("    \"Image To Console.exe\" image.png -o out.cpng -size 100x100");
+                Console.WriteLine("    \"Image To Console.exe\".exe image.png -o out.txt");
+                Console.WriteLine("    \"Image To Console.exe\".exe image.png -o out.cpng");
+                Console.WriteLine("    \"Image To Console.exe\".exe image.gif");
+                Console.WriteLine("    \"Image To Console.exe\".exe image.gif -o outFolder");
+                Console.WriteLine("    \"Image To Console.exe\".exe folder -fps 20");
+                Console.WriteLine("    \"Image To Console.exe\".exe out.cpng");
+                Console.WriteLine(" ");
+                Console.WriteLine("> Press Enter to exit.");
+                Console.ReadLine();
+                return;
+            }
+            else
+            {
+                Console.WriteLine($"> ERROR: Unknown argument \"{args[i]}\"");
+                Console.ReadLine();
+                return;
+            }
+        }
+
+        if (givenInputPath == "")
+            givenInputPath = "conv.png";
+        if (givenOutputPath == "")
+        {
+            if (givenInputPath.EndsWith(".gif"))
+                givenOutputPath = "out";
+            else
+                givenOutputPath = "out.cpng";
+        }
+        if (givenSize == "")
+            givenSize = $"{Console.WindowWidth - 2}x{Console.WindowHeight - 2}";
+        if (givenFPS == "")
+            givenFPS = "30";
+
+        int sizeX, sizeY;
+        if (!int.TryParse(givenSize.Split('x')[0], out sizeX))
+        {
+            Console.WriteLine($"> ERROR: Could not parse size X \"{givenSize.Split('x')[0]}\"");
+            Console.ReadLine();
+            return;
+        }
+        if (!int.TryParse(givenSize.Split('x')[1], out sizeY))
+        {
+            Console.WriteLine($"> ERROR: Could not parse size Y \"{givenSize.Split('x')[1]}\"");
+            Console.ReadLine();
+            return;
+        }
+
+        int fps;
+        if (!int.TryParse(givenFPS, out fps))
+        {
+            Console.WriteLine($"> ERROR: Could not parse fps \"{givenFPS}\"");
+            Console.ReadLine();
+            return;
+        }
+
         Console.OutputEncoding = System.Text.Encoding.UTF8;
         Console.ForegroundColor = ConsoleColor.White;
         Console.BackgroundColor = ConsoleColor.Black;
         Console.Clear();
 
-        string imgName = "conv.png";
-        if (args.Length == 1)
-        {
-            if (args[0].EndsWith(".txt"))
-            {
-                Console.WriteLine("> Printing saved image");
-                PrintFile(args[0]);
-                Console.ReadLine();
-                return;
-            }
-            else if (args[0].EndsWith(".cpng"))
-            {
-                ImageCharColored[,] img = LoadConsolePng(args[0]);
-                Console.WriteLine("> Printing saved image");
-                int w = img.GetLength(0);
-                int h = img.GetLength(1);
-                Console.SetWindowSize(w + 1, h + 1);
-                Print(img, true, false);
-                Console.ReadLine();
-                return;
-            }
-            else if (args[0].EndsWith(".gif"))
-            {
-                ConvertGif(args[0]);
-                Console.ReadLine();
-                return;
-            }
-            else if (Directory.Exists(args[0]))
-            {
-                PlayFolder(args[0]);
-                Console.ReadLine();
-                return;
-            }
-            else
-                imgName = args[0];
-        }
+        Console.WriteLine($"> Input Path: \"{givenInputPath}\"");
+        Console.WriteLine($"> Output Path: \"{givenOutputPath}\"");
+        Console.WriteLine($"> Size: \"{sizeX}x{sizeY}\"");
+        Console.WriteLine($"> FPS: \"{fps}\"");
+        Console.WriteLine($"> Silent: {silent}");
+        Console.WriteLine();
+        Console.ReadLine();
 
 
-        Console.WriteLine($"> Loading Map Img");
-        CreateCharMap("map.png");
-
-        Console.WriteLine($"> Loading Src Img \"{imgName}\"");
-        Image<Rgba32> srcImg;
-        try
+        if (givenInputPath.EndsWith(".txt"))
         {
-            srcImg = Image.Load<Rgba32>(imgName);
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine($"> ERROR: Program could not find the source image! (\"{imgName}\")");
-            Console.WriteLine($"  Please make sure that the source image is in the same location as your executable!");
-            Console.WriteLine($"  Error: {e.Message}");
-            Console.ReadLine();
-            Environment.Exit(1);
+            Console.WriteLine("> Printing saved image");
+            PrintFile(givenInputPath);
+            if (!silent)
+                Console.ReadLine();
             return;
         }
-        Console.WriteLine($"> Size: {srcImg.Bounds.Width}x{srcImg.Bounds.Height}");
+        else if (givenInputPath.EndsWith(".cpng"))
+        {
+            ImageCharColored[,] img = LoadConsolePng(givenInputPath);
+            Console.WriteLine("> Printing saved image");
+            int w = img.GetLength(0);
+            int h = img.GetLength(1);
+            Console.SetWindowSize(w + 1, h + 1);
+            Print(img, true, false);
 
-        Console.WriteLine("Press Enter to convert.");
-        Console.ReadLine();
+            if (!silent)
+                Console.ReadLine();
+            return;
+        }
+        else if (givenInputPath.EndsWith(".gif"))
+        {
+            ConvertGif(givenInputPath, givenOutputPath, sizeX, sizeY, silent);
+            if (!silent)
+                Console.ReadLine();
+            return;
+        }
+        else if (Directory.Exists(givenInputPath))
+        {
+            PlayFolder(givenInputPath, fps);
 
-        Console.WriteLine($"> Converting Src Img to MAX {Console.WindowWidth - 1}x{Console.WindowHeight - 1}");
-        ImageCharColored[,] converted = ConvertImage(srcImg.Frames[0], Console.WindowWidth - 2, Console.WindowHeight - 2, false);
+            if (!silent)
+                Console.ReadLine();
+            return;
+        }
+        else
+        {
+            Console.WriteLine($"> Loading Map Img");
+            CreateCharMap("map.png");
 
-        Console.WriteLine($"> Printing (no col)");
-        Print(converted, false, true);
+            Console.WriteLine($"> Loading Src Img \"{givenInputPath}\"");
+            Image<Rgba32> srcImg;
+            try
+            {
+                srcImg = Image.Load<Rgba32>(givenInputPath);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"> ERROR: Program could not find the source image! (\"{givenInputPath}\")");
+                Console.WriteLine($"  Please make sure that the source image is in the same location as your executable!");
+                Console.WriteLine($"  Error: {e.Message}");
+                Console.ReadLine();
+                Environment.Exit(1);
+                return;
+            }
+            Console.WriteLine($"> Size: {srcImg.Bounds.Width}x{srcImg.Bounds.Height}");
 
-        Console.WriteLine($"> Printing");
-        Print(converted, true, true);
 
-        Save(converted, true, "out.txt");
-        Save(converted, false, "out_nocol.txt");
-        SaveAsConsolePng(converted, "out.cpng");
+            if (!silent)
+            {
+                Console.WriteLine("Press Enter to convert.");
+                Console.ReadLine();
+            }
 
-        Console.ReadLine();
+            Console.WriteLine($"> Converting Src Img to MAX {sizeX}x{sizeY}");
+            ImageCharColored[,] converted = ConvertImage(srcImg.Frames[0], sizeX, sizeY, silent);
+
+            if (!silent)
+            {
+                Console.WriteLine($"> Printing (no col)");
+                Print(converted, false, true);
+
+                Console.WriteLine($"> Printing");
+                Print(converted, true, true);
+            }
+
+            if (givenOutputPath.EndsWith(".txt"))
+                Save(converted, true, givenOutputPath);
+            else if (givenOutputPath.EndsWith(".cpng"))
+                SaveAsConsolePng(converted, givenOutputPath);
+            else
+            {
+                Console.WriteLine($"> ERROR: Unknown output format \"{givenOutputPath}\"");
+                Console.ReadLine();
+                return;
+            }
+
+            if (!silent)
+                Console.ReadLine();
+        }
     }
 
-    public static void PlayFolder(string folderName)
+    public static void PlayFolder(string folderName, int fps)
     {
         Console.WriteLine($"> Playing Folder {folderName}");
 
@@ -129,10 +285,6 @@ public class Program
             imgs.Add(LoadConsolePng(sorted[i]));
         }
 
-        Console.Write("> Enter FPS: ");
-        int fps = int.Parse(Console.ReadLine());
-        Console.WriteLine();
-
 
         Console.WriteLine("> Press Enter to play...");
         Console.ReadLine();
@@ -158,10 +310,8 @@ public class Program
         }
     }
 
-    public static void ConvertGif(string imgName)
+    public static void ConvertGif(string imgName, string folderName, int sizeX, int sizeY, bool silent)
     {
-        string folderName = Path.GetFileNameWithoutExtension(imgName);
-
         Console.WriteLine($"> Output Folder: \"{folderName}\"");
         if (Directory.Exists(folderName))
             Directory.Delete(folderName, true);
@@ -191,11 +341,15 @@ public class Program
         int fps = 100/srcImg.Frames.RootFrame.Metadata.GetGifMetadata().FrameDelay;
         Console.WriteLine($"> FPS: {fps}");
 
-        Console.WriteLine("Press Enter to convert.");
-        Console.ReadLine();
+        if (!silent)
+        {
+            Console.WriteLine("Press Enter to convert.");
+            Console.ReadLine();
+        }
 
-        Console.WriteLine($"> Converting Src Img to MAX {Console.WindowWidth - 1}x{Console.WindowHeight - 1}");
-        ConvertImage(srcImg.Frames[0], Console.WindowWidth - 1, Console.WindowHeight - 1, false);
+        Console.WriteLine($"> Converting Src Img to MAX {sizeX}x{sizeY}");
+        if (!silent)
+            ConvertImage(srcImg.Frames[0], sizeX, sizeY, false);
 
         Console.WriteLine();
         Console.CursorVisible = false;
@@ -215,11 +369,13 @@ public class Program
         ulong framesDone = 0;
         bool printFrameStatus = false;
         
+
+
         for (int frameI = 0, tI = 0; frameI < fCount; frameI += fStep, tI++)
         {
             Console.Write(threadStr);
             int tDone = threads.Count(t => !t.IsAlive);
-            Console.Write($"Thread: {tI}/{tCount} (Threads Started: {Math.Round((tI / (double)tCount) *10000)/100} %) (Frames Done: {Math.Round((tDone / (double)tCount) * 10000) / 100} %)                 ");
+            Console.Write($"Thread: {tI}/{tCount} (Threads Started: {Math.Round((tI / (double)tCount) *10000)/100} %)     ");
 
             int frameS = frameI;
             Thread t = new(() =>
@@ -229,20 +385,22 @@ public class Program
                     //Console.WriteLine($"> Converting Frame {frameI1 + 1}/{srcImg.Frames.Count}");
                     ImageFrame<Rgba32> frame = srcImg.Frames[frameI2];
 
-                    ImageCharColored[,] converted = ConvertImage(frame, Console.WindowWidth - 1, Console.WindowHeight - 1, true);
+                    ImageCharColored[,] converted = ConvertImage(frame, sizeX, sizeY, true);
 
                     SaveAsConsolePng(converted, folderName + $"/frame{frameI2}.cpng");
 
                     if (printFrameStatus)
                     {
-                        int fDone = (int)Interlocked.Increment(ref framesDone);
-                        int tDone = threads.Count(t => !t.IsAlive);
                         lock (lockObj)
                         {
+                            int fDone = (int)Interlocked.Increment(ref framesDone);
+                            int tDone = threads.Count(t => !t.IsAlive);
                             Console.Write(conversionStr);
                             Console.Write($" {fDone}/{fCount} Frames Done ({Math.Round((fDone / (double)fCount)*10000)/100} %), {tDone}/{tCount} Threads done     ");
                         }
                     }
+                    else
+                        Interlocked.Increment(ref framesDone);
                 }
             });
             threads.Add(t);
